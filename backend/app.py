@@ -10,10 +10,14 @@ import jwt
 import re
 import requests
 import json
+from dotenv import load_dotenv
+
+
 # from api.login import Login
 # from api.register import Register
 # from flask_jwt import JWT, jwt_required, current_identity
 
+load_dotenv()
 
 app = Flask(__name__)
 timezone = datetime.timezone(datetime.timedelta(
@@ -36,34 +40,33 @@ class LoginView(Resource):
             return not_found("Some fields are missing.")
         phone = data.get('phone') or data.get('username')
         password = data.get('imei') or data.get('password')
-        if phone and password:
-            user = users.find_one({'phone': phone})
-            if user:
-                password_hash = user.get("password", "")
-                if (not check_password_hash(password_hash, password)
-                        and password_hash):
-                    return jsonify(
-                        {
-                            'success': False,
-                            'token': None,
-                            'message': "Invalid Password"
-                        })
-                response = {
-                    'success': True,
-                    "first_run": False,
-                    'token': encode_auth_token(phone, user.get("is_admin"))}
-                if not password_hash:
-                    response.update({"first_run": True})
-                return jsonify(response)
-            else:
-                return jsonify(
-                    {
-                        'success': False,
-                        'token': None,
-                        'message': "No such user exists"
-                    })
-        else:
+        if not phone or not password:
             return not_found("Some fields are missing.")
+
+        user = users.find_one({'phone': phone})
+        if not user:
+            return jsonify(
+                {
+                    'success': False,
+                    'token': None,
+                    'message': "No such user exists"
+                })
+        password_hash = user.get("password", "")
+        if (not check_password_hash(password_hash, password)
+                and password_hash):
+            return jsonify(
+                {
+                    'success': False,
+                    'token': None,
+                    'message': "Invalid Password"
+                })
+        response = {
+            'success': True,
+            "first_run": False,
+            'token': encode_auth_token(phone, user.get("is_admin"))}
+        if not password_hash:
+            response.update({"first_run": True})
+        return jsonify(response)
 
 
 class UserView(Resource):
@@ -77,22 +80,22 @@ class UserView(Resource):
         resp = decode_auth_token(auth_token)
         if isinstance(resp, str):
             return not_found(resp)
-        if resp["admin"]:
-            user_list = users.find({"is_admin": False})
-            profile_list = []
-            for user in user_list:
-                user.pop("password", None)
-                user.pop("_id", None)
-                user = json.loads(json.dumps(user, default=iso_convert))
-                profile_list.append(user)
-            return jsonify(
-                {
-                    "success": True,
-                    "count": user_list.retrieved,
-                    "users": profile_list
-                })
-        else:
+        if not resp["admin"]:
             return not_found("Unauthorized User")
+
+        user_list = users.find({"is_admin": False})
+        profile_list = []
+        for user in user_list:
+            user.pop("password", None)
+            user.pop("_id", None)
+            user = json.loads(json.dumps(user, default=iso_convert))
+            profile_list.append(user)
+        return jsonify(
+            {
+                "success": True,
+                "count": user_list.retrieved,
+                "users": profile_list
+            })
 
     def post(self):
         auth_header = request.headers.get('Authorization')
@@ -138,7 +141,7 @@ class UserView(Resource):
                             "timestamp": now,
                             "logs": []
                         },
-                        "fcm":""
+                        "fcm": ""
                     }
                 }, upsert=True)
             attendance.update_one(
@@ -236,7 +239,7 @@ class ProfileView(Resource):
         #         **json.loads(json.dumps(user, default=iso_convert))
         #     })
 
-    def update(self,user,log):
+    def update(self, user, log):
         prev_logs = user["current"].get("logs", [])
         # print("PREV: ", prev_logs)
         # print("LOGS: ", len(prev_logs))
@@ -248,8 +251,7 @@ class ProfileView(Resource):
                     '$set': {"active": 1}
                 })
         else:
-            p_count = int(all([prev_log["available"]
-                                for prev_log in prev_logs]))
+            p_count = int(all(prev_log["available"] for prev_log in prev_logs))
             overall = user["overall"]
             users.update_one(
                 {'phone': user['phone']},
@@ -301,7 +303,7 @@ class ProfileView(Resource):
             # timediff = datetime.datetime.strptime(
             #     now_str, datef)-user["current"].get("timestamp")
             # if (timediff < datetime.timedelta(hours=21)):
-            self.update(user,log)
+            self.update(user, log)
             return jsonify({"success": True, "available": available})
         else:
             return not_found("Some fields are missing.")
@@ -358,20 +360,20 @@ class DetailUserView(Resource):
         resp = decode_auth_token(auth_token)
         if isinstance(resp, str):
             return not_found(resp)
-        if resp["admin"] or userId == resp["id"]:
-            user = attendance.find_one({"phone": userId})
-            if user:
-                return jsonify(
-                    {
-                        "success": True,
-                        "attendance": json.loads(
-                            json.dumps(user.pop("logs", []),
-                                       default=iso_convert))
-                    })
-            else:
-                return not_found("No Such User Exists")
-        else:
+        if not resp["admin"] and userId != resp["id"]:
             return not_found("Unauthorized User")
+
+        user = attendance.find_one({"phone": userId})
+        if user:
+            return jsonify(
+                {
+                    "success": True,
+                    "attendance": json.loads(
+                        json.dumps(user.pop("logs", []),
+                                   default=iso_convert))
+                })
+        else:
+            return not_found("No Such User Exists")
 
     def post(self, userId):
         return jsonify(
@@ -445,17 +447,11 @@ class Point:
 
     @staticmethod
     def coords_serializer(coords):
-        response = []
-        for coord in coords:
-            response.append(dict(lon=coord[0], lat=coord[1]))
-        return response
+        return [dict(lon=coord[0], lat=coord[1]) for coord in coords]
 
     @staticmethod
     def coords_deserializer(coords):
-        points = []
-        for coord in coords:
-            points.append(Point(coord["lon"], coord["lat"]))
-        return points
+        return [Point(coord["lon"], coord["lat"]) for coord in coords]
 
 
 class MapPolygon:
@@ -470,13 +466,15 @@ class MapPolygon:
         N = len(self.points)
         for i in range(N+1):
             p2 = self.points[i % N]
-            if (p.y > min(p1.y, p2.y)):
-                if(p.y <= max(p1.y, p2.y)):
-                    if(p.x <= max(p1.x, p2.x)):
-                        if(p1.y != p2.y):
-                            xint = (p.y-p1.y)*(p2.x-p1.x)/(p2.y-p1.y)+p1.x
-                            if (p1.x == p2.x or p.x <= xint):
-                                counter += 1
+            if (
+                (p.y > min(p1.y, p2.y))
+                and (p.y <= max(p1.y, p2.y))
+                and (p.x <= max(p1.x, p2.x))
+                and (p1.y != p2.y)
+            ):
+                xint = (p.y-p1.y)*(p2.x-p1.x)/(p2.y-p1.y)+p1.x
+                if (p1.x == p2.x or p.x <= xint):
+                    counter += 1
             p1 = p2
         return counter % 2 != 0
 
@@ -599,11 +597,9 @@ def encode_auth_token(user_id, is_admin=False):
         return e
 
 
-app.config['MONGODB_NAME'] = 'hackathon'
-app.config['MONGO_URI'] = ('mongodb+srv://gnosticplayer:pass12345'
-                           '@cluster0.qarzu.mongodb.net/hackathon'
-                           '?retryWrites=true&w=majority')
-app.config['SECRET_KEY'] = 'secret_key'
+app.config['MONGODB_NAME'] = os.getenv('MONGODB_NAME')
+app.config['MONGO_URI'] = os.getenv('MONGO_URI')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 cors = CORS(app)
 mongo = PyMongo(app)

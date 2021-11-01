@@ -3,13 +3,14 @@ import requests
 import pymongo
 import time
 import datetime
+import os
+from dotenv import load_dotenv
 from app import ProfileView
 
-client = pymongo.MongoClient(
-    "mongodb+srv://gnosticplayer:pass12345@"
-    "cluster0.qarzu.mongodb.net/hackathon"
-    "?retryWrites=true&w=majority")
-db = client.hackathon
+load_dotenv()
+
+client = pymongo.MongoClient(os.getenv('MONGO_URI'))
+db = client[os.getenv('MONGODB_NAME')]
 users = db.users
 profile = ProfileView()
 timezone = datetime.timezone(datetime.timedelta(
@@ -22,8 +23,9 @@ def send_notification(user_token):
 
     url = "https://fcm.googleapis.com/fcm/send"
 
-    headers = dict()
-    headers["Authorization"] = "key=AAAATyvUHn8:APA91bEGhI-RblLnlAf1-e0R-xgKKe9zSDTD1HtLGGiB_OXk8vIfv-Sz6t7w17OoaBVi4dG7C5Mu8fX2IdHHPMcxjckXygoKZsWfFoUWzsRkrKg0WOhFs_-uJofLjtKBCKg8aqdlheEK"
+    headers = {
+        'Authorization': 'key='+os.getenv('FCM')
+    }
 
     data = {
         "to": user_token,
