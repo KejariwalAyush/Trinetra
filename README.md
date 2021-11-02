@@ -1,7 +1,6 @@
 
 # Trinetra 
 ### Team : TechSpace
-UtkalHacks 3.0
 
 ![alt text](https://github.com/KejariwalAyush/Trinetra/blob/master/images/trinatra%20logo.jpeg?raw=true)
 
