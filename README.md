@@ -69,6 +69,9 @@ just make sure Flutter (Dart) is installed.
 ```
 To access backend files Go to the backend directory
 After going you can view the files from any editor or VS Code editor, 
-just make sure Python is installed.
+just make sure Python is installed, then install requirements and run the code.
 ```bash
  cd backend
+ pip install -r requirements.txt
+ python app.py
+ ```
