@@ -44,3 +44,31 @@ Creating an App which will be installed in every employee's mobile phone and wit
 
 ### **Our Innovative Feature**
 All the Employees will get notification to give attendance at the start and the end of the session with their mobile’s fingerprint sensor or by verifying their Face Ids. Prior to the loopholes,  The employees will additionally have to give randomly 3-4 times attendance on the same day. After successful registration ,  timestamp as well as their geolocation details will be sent to the database in the cloud , if the employee at the time of attendance mapped outside the periphery  of the building , his/her attendance fails for that day.
+
+## Documentation (How to run prototype) 
+
+Clone the project
+
+```bash
+  git clone https://github.com/KejariwalAyush/Trinetra.git
+```
+
+To access Trinetra app Go to the app directory
+After going you can run the files from Android Studio or VS Code editor, 
+just make sure Flutter (Dart) is installed.
+```bash
+  cd main_app
+```
+
+To access Trinetra admin panel  Go to the panel directory
+After going you can run the files from Android Studio or VS Code editor, 
+just make sure Flutter (Dart) is installed.
+```bash
+  cd admin_panel
+  cd adminpanelflutter
+```
+To access backend files Go to the backend directory
+After going you can view the files from any editor or VS Code editor, 
+just make sure Python is installed.
+```bash
+ cd backend
