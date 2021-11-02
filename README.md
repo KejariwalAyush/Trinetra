@@ -21,7 +21,7 @@ Password: admin123
 * Gyanaranjan Sahoo
 
 ## About Project
-An E-Biometric Attendance app which aims for a contacless , secure & accurate attendance which covers all the loopholes from the present *Biometric System* .
+An E-Biometric Attendance app which aims for a contactless , secure & accurate attendance which covers all the loopholes from the present *Biometric System* .
 
 ## Problems in the Present *Biometric System*  
 * Since it is the period of COVID-19 , all the people are focusing towards their health , Biometric Attendance systems which are installed in various sectors like malls, Schools , Hospitals  can be a nightmare for various people . People are creating many innovative ideas of contactless approach.
