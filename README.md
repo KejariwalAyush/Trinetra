@@ -6,13 +6,15 @@
 
 ![](https://img.shields.io/badge/Language-FLUTTER-blue)  
 
-[Trinetra App](https://drive.google.com/drive/folders/1smUIXECV7HVzTJXSEMUgoU8a21qNmCRn?usp=sharing)
+[Trinetra App](https://github.com/KejariwalAyush/Trinetra/blob/master/Trinetra.apk?raw=true)
 Phone no: 9090999999
 OTP: 123456
 
 [Trinetra Admin Panel](https://trinetra-admin-panel.netlify.app)
 Email: admin
 Password: admin123
+
+[Trinetra Demo Video](https://youtu.be/ksJjyAPua-0)
 
 ## **Team Members**
 * Adarsh Padhi
